@@ -157,7 +157,10 @@ class Neel_Book_Store {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 		$this->loader->add_action( 'init', $plugin_admin, 'register_book_post_type');
-		$this->loader->add_action( 'init', $plugin_admin, 'register_taxonomy_book');
+		$this->loader->add_action( 'init', $plugin_admin, 'register_taxonomy_book_category');
+		$this->loader->add_action( 'init', $plugin_admin, 'register_taxonomy_book_tag');
+		$this->loader->add_action( 'add_meta_boxes', $plugin_admin, 'add_custom_box' );
+		$this->loader->add_action( 'save_post', $plugin_admin, 'save_book');
 
 	}
 
