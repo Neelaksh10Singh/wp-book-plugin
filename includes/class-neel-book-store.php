@@ -56,7 +56,7 @@ class Neel_Book_Store {
 	 * @var      string    $version    The current version of the plugin.
 	 */
 	protected $version;
-
+	public $book_options; 
 	/**
 	 * Define the core functionality of the plugin.
 	 *
@@ -67,6 +67,7 @@ class Neel_Book_Store {
 	 * @since    1.0.0
 	 */
 	public function __construct() {
+		$this->book_options = get_option('book_settings', ['currency'=>'', 'entries'=>'']); 
 		if ( defined( 'NEEL_BOOK_STORE_VERSION' ) ) {
 			$this->version = NEEL_BOOK_STORE_VERSION;
 		} else {
@@ -143,6 +144,8 @@ class Neel_Book_Store {
 
 	}
 
+	
+
 	/**
 	 * Register all of the hooks related to the admin area functionality
 	 * of the plugin.
@@ -161,6 +164,8 @@ class Neel_Book_Store {
 		$this->loader->add_action( 'init', $plugin_admin, 'register_taxonomy_book_tag');
 		$this->loader->add_action( 'add_meta_boxes', $plugin_admin, 'add_custom_box' );
 		$this->loader->add_action( 'save_post', $plugin_admin, 'save_book');
+		$this->loader->add_action('admin_menu', $plugin_admin, 'book_add_options_link');          //hooking the function to admin menu
+		$this->loader->add_action('admin_init', $plugin_admin, 'book_register_settings');
 
 	}
 

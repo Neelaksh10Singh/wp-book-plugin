@@ -277,5 +277,49 @@ class Neel_Book_Store_Admin {
 		</p>
 		<?php
 	}
+
+
+	public function book_options_page(){           //contents of page
+
+		$book_options = get_option('book_settings', ['currency'=>'', 'entries'=>'']);
+		
+
+		ob_start(); ?> 
+		<div class = "wrap">
+			<h2> Books Page Settings </h2>    
+			<form method="post" action="options.php">
+
+				<?php settings_fields("book_settings_group"); ?>
+
+				<h3><?php _e('Display Settings','book_domain'); ?></h3>
+				<p>
+					<label class="description" for="book_settings[currency]"><?php _e('Currency ','book_domain'); ?></label>
+					<input id="book_settings[currency]" name="book_settings[currency]" type="text" value="<?php echo $book_options['currency'];  ?>"/>
+					
+				</p>
+				<p>
+					<label class="description" for="book_settings[entries]"><?php _e('Enties per page ','book_domain'); ?></label>
+					<input id="book_settings[entries]" name="book_settings[entries]" type="text" value="<?php echo $book_options['entries']; ?>"/>
+				</p>
+
+				
+				<p class="submit">
+					<input type="submit" class="button-primary" value = "<?php _e('Save Options','book_domain'); ?>">
+				</p>
+			</form>
+		</div>
+		<?php
+		echo ob_get_clean();
+
+	}
+
+
+	 function book_add_options_link(){               //function to add the page in settings menu
+		add_options_page('Book Options', 'Books', 'manage_options', 'book-options', array($this, 'book_options_page'));
+	}
+
+	function book_register_settings(){              //register the settings selected in page and store it in database
+		register_setting('book_settings_group','book_settings');
+	}
 	
 }
