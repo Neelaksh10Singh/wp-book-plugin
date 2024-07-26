@@ -95,7 +95,12 @@ class Neel_Book_Store_Admin {
 		 * between the defined hooks and the functions defined in this
 		 * class.
 		 */
-
+		wp_enqueue_script(
+			'neel-book-store-block',
+			plugin_dir_url(__FILE__) . 'js/neel-book-store-block.js',
+			array('wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor', 'wp-data'),
+			filemtime(plugin_dir_path(__FILE__) . 'js/neel-book-store-block.js')
+		);
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/neel-book-store-admin.js', array( 'jquery' ), $this->version, false );
 
 	}
@@ -155,6 +160,7 @@ class Neel_Book_Store_Admin {
 			'show_admin_column' => true,
 			'query_var'         => true,
 			'rewrite'           => [ 'slug' => 'book_category' ],
+			'show_in_rest'      => true,
 		);
 		register_taxonomy( 'book_category', [ 'book' ], $args );
 	}
@@ -312,7 +318,89 @@ class Neel_Book_Store_Admin {
 		echo ob_get_clean();
 
 	}
+	public function register_block() {
+        // Register the block editor script
+        wp_register_script(
+            'neel-book-store-block',
+            plugin_dir_url(__FILE__) . 'js/neel-book-store-block.js',
+            array('wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor', 'wp-data'),
+            filemtime(plugin_dir_path(__FILE__) . 'js/neel-book-store-block.js')
+        );
 
+        // Register the block type
+        register_block_type('neel-book-store/book-category', array(
+            'editor_script' => 'neel-book-store-block',
+            'render_callback' => array($this, 'render_block'),
+            'attributes' => array(
+                'category' => array(
+                    'type' => 'string',
+                ),
+            ),
+        ));
+    }
+
+	 public function render_block($attributes) {
+        // Fetch books from the selected category
+        $category = isset($attributes['category']) ? $attributes['category'] : '';
+        $query = new WP_Query(array(
+            'post_type' => 'book',
+            'tax_query' => array(
+                array(
+                    'taxonomy' => 'book_category',
+                    'field'    => 'slug',
+                    'terms'    => $category,
+                ),
+            ),
+        ));
+
+        if (!$query->have_posts()) {
+            return '<p>No books found.</p>';
+        }
+
+        $content = '<ul class="book-list">';
+        while ($query->have_posts()) {
+            $query->the_post();
+            $content .= '<li>' . get_the_title() . '</li>';
+        }
+        $content .= '</ul>';
+
+        wp_reset_postdata();
+
+        return $content;
+    }
+
+	function neel_book_store_register_dashboard_widget() {
+		wp_add_dashboard_widget(
+			'neel_book_store_dashboard_widget', 
+			'Top 5 Book Categories',            
+			 array($this, 'neel_book_store_display_dashboard_widget')
+		);
+	}
+	function neel_book_store_get_top_book_categories() {
+    $terms = get_terms(array(
+        'taxonomy' => 'book_category',
+        'orderby' => 'count',
+        'order' => 'DESC',
+        'number' => 5
+    ));
+
+		return $terms;
+	}
+
+	function neel_book_store_display_dashboard_widget() {
+		$categories = $this->neel_book_store_get_top_book_categories();
+
+		if (empty($categories) || is_wp_error($categories)) {
+			echo 'No book categories found.';
+			return;
+		}
+
+		echo '<ul>';
+		foreach ($categories as $category) {
+			echo '<li>' . esc_html($category->name) . ' (' . $category->count . ' books)</li>';
+		}
+		echo '</ul>';
+	}
 
 	 function book_add_options_link(){               //function to add the page in settings menu
 		add_options_page('Book Options', 'Books', 'manage_options', 'book-options', array($this, 'book_options_page'));
