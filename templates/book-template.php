@@ -10,7 +10,6 @@ get_header(); ?>
     <main id="main" class="site-main" role="main">
 
     <?php
-    // Query for books posts
     $args = array(
         'post_type' => 'book',
         'posts_per_page' => -1,

@@ -164,7 +164,7 @@ class Neel_Book_Store {
 		$this->loader->add_action( 'init', $plugin_admin, 'register_taxonomy_book_tag');
 		$this->loader->add_action( 'add_meta_boxes', $plugin_admin, 'add_custom_box' );
 		$this->loader->add_action( 'save_post', $plugin_admin, 'save_book');
-		$this->loader->add_action('admin_menu', $plugin_admin, 'book_add_options_link');          //hooking the function to admin menu
+		$this->loader->add_action('admin_menu', $plugin_admin, 'book_add_options_link');         
 		$this->loader->add_action('admin_init', $plugin_admin, 'book_register_settings');
 		$this->loader->add_action('init', $plugin_admin, 'register_block');
 		$this->loader->add_action('wp_dashboard_setup', $plugin_admin, 'neel_book_store_register_dashboard_widget');

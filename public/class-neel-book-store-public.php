@@ -101,7 +101,6 @@ class Neel_Book_Store_Public {
 	}
 
 	public function book_shortcode($atts) {
-        // Shortcode attributes with default values
         $atts = shortcode_atts(
             array(
                 'id' => '',

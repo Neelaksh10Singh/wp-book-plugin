@@ -19,7 +19,6 @@ registerBlockType("neel-book-store/book-category", {
     const categories = getEntityRecords("taxonomy", "book_category", {
       per_page: -1,
     });
-    // console.log(categories);
     return { categories };
   })(({ attributes, setAttributes, categories }) => {
     if (!categories) {

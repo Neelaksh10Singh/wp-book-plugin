@@ -154,7 +154,7 @@ class Neel_Book_Store_Admin {
 			'menu_name'         => __( 'Book Category' ),
 		);
 		$args   = array(
-			'hierarchical'      => true, // make it hierarchical (like categories)
+			'hierarchical'      => true, 
 			'labels'            => $labels,
 			'show_ui'           => true,
 			'show_admin_column' => true,
@@ -179,7 +179,7 @@ class Neel_Book_Store_Admin {
 			'menu_name'         => __( 'Book Tag' ),
 		);
 		$args   = array(
-			'hierarchical'      => false, // make it hierarchical (like categories)
+			'hierarchical'      => false, 
 			'labels'            => $labels,
 			'show_ui'           => true,
 			'show_admin_column' => true,
@@ -192,14 +192,51 @@ class Neel_Book_Store_Admin {
 		$screens = [ 'book' ];
 		foreach ( $screens as $screen ) {
 			add_meta_box(
-				'box_id',          // Unique ID
-				'Book Information', // Box title
-				array($this, 'box_html'),  // Content callback, must be of type callable
-				$screen                  // Post type
+				'box_id',         
+				'Book Information', 
+				array($this, 'box_html'), 
+				$screen                
 			);
 		}
 	}
 
+	
+	public function box_html( $post ) {
+		
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'books_meta';
+		
+		$meta_data = $wpdb->get_results($wpdb->prepare(
+			"SELECT meta_key, meta_value FROM $table_name WHERE book_id = %d",
+			$post->ID
+		), OBJECT_K);
+		
+		
+		$author = isset($meta_data['_book_author']->meta_value) ? $meta_data['_book_author']->meta_value : '';
+    	$price = isset($meta_data['_book_price']->meta_value) ? $meta_data['_book_price']->meta_value : '';
+    	$publisher = isset($meta_data['_book_publisher']->meta_value) ? $meta_data['_book_publisher']->meta_value : '';
+    	$year = isset($meta_data['_book_year']->meta_value) ? $meta_data['_book_year']->meta_value : '';
+		
+		?>
+
+		<p>
+		<label for="book_author">Author Name</label>
+		<input type="text" name="book_author" id="book_author" value="<?php echo esc_attr($author); ?>"/>
+		</p>
+		<p>
+		<label for="book_publisher">Publisher</label>
+		<input type="text" name="book_publisher" id="book_publisher" value="<?php echo esc_attr($publisher); ?>"/>
+		</p>
+		<p>
+		<label for="book_price">Price</label>
+		<input type="number" name="book_price" id="book_price" value="<?php echo esc_attr($price); ?>"/>
+		</p>
+		<p>
+		<label for="book_year">Year</label>
+		<input type="text" name="book_year" id="book_year" value="<?php echo esc_attr($year); ?>"/>
+		</p>
+		<?php
+	}
 	public function save_book( int $post_id ) {
 
 		// if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
@@ -245,47 +282,8 @@ class Neel_Book_Store_Admin {
 			}
 		}
 	}
-	public function box_html( $post ) {
-		// echo $post->ID;
-		global $wpdb;
-		$table_name = $wpdb->prefix . 'books_meta';
-		// echo ''. $table_name .'';
-		$meta_data = $wpdb->get_results($wpdb->prepare(
-			"SELECT meta_key, meta_value FROM $table_name WHERE book_id = %d",
-			$post->ID
-		), OBJECT_K);
-		
-		// foreach ($meta_data as $meta_key => $meta_value){
-		// 	echo"". $meta_key ."". $meta_value;
-		// }
-		$author = isset($meta_data['_book_author']->meta_value) ? $meta_data['_book_author']->meta_value : '';
-    	$price = isset($meta_data['_book_price']->meta_value) ? $meta_data['_book_price']->meta_value : '';
-    	$publisher = isset($meta_data['_book_publisher']->meta_value) ? $meta_data['_book_publisher']->meta_value : '';
-    	$year = isset($meta_data['_book_year']->meta_value) ? $meta_data['_book_year']->meta_value : '';
-		// echo "HELLOO" . $author . ''. $price .''. $publisher .''. $year ;
-		?>
 
-		<p>
-		<label for="book_author">Author Name</label>
-		<input type="text" name="book_author" id="book_author" value="<?php echo esc_attr($author); ?>"/>
-		</p>
-		<p>
-		<label for="book_publisher">Publisher</label>
-		<input type="text" name="book_publisher" id="book_publisher" value="<?php echo esc_attr($publisher); ?>"/>
-		</p>
-		<p>
-		<label for="book_price">Price</label>
-		<input type="number" name="book_price" id="book_price" value="<?php echo esc_attr($price); ?>"/>
-		</p>
-		<p>
-		<label for="book_year">Year</label>
-		<input type="text" name="book_year" id="book_year" value="<?php echo esc_attr($year); ?>"/>
-		</p>
-		<?php
-	}
-
-
-	public function book_options_page(){           //contents of page
+	public function book_options_page(){         
 
 		$book_options = get_option('book_settings', ['currency'=>'', 'entries'=>'']);
 		
@@ -318,8 +316,9 @@ class Neel_Book_Store_Admin {
 		echo ob_get_clean();
 
 	}
+
+	
 	public function register_block() {
-        // Register the block editor script
         wp_register_script(
             'neel-book-store-block',
             plugin_dir_url(__FILE__) . 'js/neel-book-store-block.js',
@@ -327,7 +326,6 @@ class Neel_Book_Store_Admin {
             filemtime(plugin_dir_path(__FILE__) . 'js/neel-book-store-block.js')
         );
 
-        // Register the block type
         register_block_type('neel-book-store/book-category', array(
             'editor_script' => 'neel-book-store-block',
             'render_callback' => array($this, 'render_block'),
@@ -340,7 +338,6 @@ class Neel_Book_Store_Admin {
     }
 
 	 public function render_block($attributes) {
-        // Fetch books from the selected category
         $category = isset($attributes['category']) ? $attributes['category'] : '';
         $query = new WP_Query(array(
             'post_type' => 'book',
@@ -402,11 +399,11 @@ class Neel_Book_Store_Admin {
 		echo '</ul>';
 	}
 
-	 function book_add_options_link(){               //function to add the page in settings menu
+	 function book_add_options_link(){              
 		add_options_page('Book Options', 'Books', 'manage_options', 'book-options', array($this, 'book_options_page'));
 	}
 
-	function book_register_settings(){              //register the settings selected in page and store it in database
+	function book_register_settings(){             
 		register_setting('book_settings_group','book_settings');
 	}
 	
